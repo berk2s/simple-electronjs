@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Maviden İste - Kimlik doğrulama</title>
+    <link type="text/css" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/>
+</head>
+
+<body style="background-color:#f5f5f5">
+
+    <div style="display:flex; flex-direction:column; flex:1; height:280px; justify-content: center; align-items:center; ">
+        <div class="input-field col s6">
+            <input placeholder="Kullanıcı adı" id="userName" type="text" class="validate">
+        </div>
+        <a id='getLink' class="waves-effect waves-light btn" style="font-weight: bold">GİRİŞ LİNKİ AL</a>
+        <div class="progress" id="progress" style="display:none">
+            <div class="indeterminate"></div>
+        </div>
+        <span id='linkArea' style="color:#304555;font-size: 14px;margin-top:10px; font-family: Arial"></span>
+    </div>
+
+    <script type="text/javascript" src="js/materialize.min.js"></script>
+
+    <script>
+        const API_URL = 'http://192.168.1.106:5000';
+        document.getElementById('getLink').addEventListener('click', () => {
+            document.getElementById('progress').style.display = 'block'
+            const username = document.getElementById('userName').value;
+
+            if(username.trim() == ''){
+                M.toast({html: 'Kullanıcı adını boş bırakmayın'});
+                document.getElementById('progress').style.display = 'none'
+                return false;
+            }
+
+            fetch(`${API_URL}/api/identity`, {
+                method:'POST',
+                headers:{
+                    'Content-Type':'application/json'
+                },
+                body:JSON.stringify({
+                    username:username
+                })
+            })
+            .then(data => data.json())
+            .then(data => {
+                if(!data.status){
+                    M.toast({html: data.data});
+                    document.getElementById('progress').style.display = 'none'
+                    return false;
+                }
+
+                const key = data.data;
+                document.getElementById('linkArea').innerHTML = `${API_URL}/?token=${key}`
+
+                document.getElementById('progress').style.display = 'none'
+            })
+            .catch(e => {
+                console.log(e);
+            })
+
+        })
+    </script>
+</body>
+
+</html>
